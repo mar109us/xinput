@@ -2,4 +2,6 @@
 
  */
 
-console.log("mew")
+function test() {
+	console.log("mew");
+}
