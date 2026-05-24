@@ -1,27 +1,22 @@
-const output = document.getElementById("output") as HTMLElement;
+console.log("Vite application active.");
 
-let gamepadIndex: any;
-window.addEventListener("gamepadconnected", (event) => {
-	gamepadIndex = event.gamepad.index;
-});
+const socket = new WebSocket("ws://localhost:8080");
 
-let myGamepad: any;
+socket.onopen = () => {
+	console.log("Successfully connected to native gamepad server.");
+};
 
-function gameLoop() {
-	if (gamepadIndex !== undefined) {
-		myGamepad = navigator.getGamepads()[gamepadIndex];
-		output.innerHTML = "";
-		myGamepad.buttons
-			.map((e: any) => e.pressed)
-			.forEach((isPressed: any, buttonIndex: any) => {
-				if (isPressed) {
-					output.innerHTML += `<h1>Button ${buttonIndex} is pressed</h1>`;
-				}
-			});
+socket.onmessage = (event) => {
+	const data = JSON.parse(event.data);
+	console.log(`${data.button}`);
+	const logDiv = document.getElementById("log");
+	if (logDiv) {
+		const p = document.createElement("p");
+		p.innerText = `Button ${data.button} pressed at ${new Date().toLocaleTimeString()}`;
+		logDiv.prepend(p);
 	}
-	if (gamepadIndex === undefined) {
-		output.innerHTML = `Controller disconnected`;
-	}
-	requestAnimationFrame(gameLoop);
-}
-requestAnimationFrame(gameLoop);
+};
+
+socket.onerror = (error) => {
+	console.error("WebSocket Error:", error);
+};
